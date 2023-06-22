@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 struct Student {
@@ -7,82 +8,43 @@ struct Student {
     float marks;
 };
 
-void parseString(const char* input, struct Student* students, int size) {
-    char* token = strtok((char*)input, " ");
-    for (int i = 0; i < size; i++) {
+void parseStringToStructArray(const char *inputString, int numStudents, struct Student *students) {
+    const char *delimiter = " ";
+    char *token;
+    char *inputCopy = strdup(inputString); // Create a copy of the input string
+
+    token = strtok(inputCopy, delimiter);
+
+    for (int i = 0; i < numStudents; i++) {
         students[i].rollno = atoi(token);
-        token = strtok(NULL, " ");
-        strncpy(students[i].name, token, sizeof(students[i].name));
-        token = strtok(NULL, " ");
+
+        token = strtok(NULL, delimiter);
+        strcpy(students[i].name, token);
+
+        token = strtok(NULL, delimiter);
         students[i].marks = atof(token);
-        token = strtok(NULL, " ");
-    }
-}
 
-void initializeStudents(struct Student* students, int size) {
-    for (int i = 0; i < size; i++) {
-        students[i].rollno = 0;
-        students[i].name[0] = '\0';
-        students[i].marks = 0.0;
+        token = strtok(NULL, delimiter);
     }
-}
 
-void displayStudents(const struct Student* students, int size) {
-    printf("Roll No\tName\tMarks\n");
-    for (int i = 0; i < size; i++) {
-        printf("%d\t%s\t%.2f\n", students[i].rollno, students[i].name, students[i].marks);
-    }
-}
-
-void sortStudentsDescending(struct Student* students, int size) {
-    for (int i = 0; i < size - 1; i++) {
-        for (int j = 0; j < size - i - 1; j++) {
-            if (students[j].marks < students[j + 1].marks) {
-                struct Student temp = students[j];
-                students[j] = students[j + 1];
-                students[j + 1] = temp;
-            }
-        }
-    }
-}
-
-void searchStudentByName(const struct Student* students, int size, const char* name) {
-    printf("Search results for '%s':\n", name);
-    printf("Roll No\tName\tMarks\n");
-    for (int i = 0; i < size; i++) {
-        if (strcmp(students[i].name, name) == 0) {
-            printf("%d\t%s\t%.2f\n", students[i].rollno, students[i].name, students[i].marks);
-        }
-    }
+    free(inputCopy); // Free the dynamically allocated memory
 }
 
 int main() {
-    int size;
-    printf("Enter the number of students: ");
-    scanf("%d", &size);
-    fflush(stdin); // Clear input buffer
-    
-    struct Student students[size];
-    char input[100];
+    const char *inputString = "1001 Aron 100.00";
+    int numStudents = 1; // Number of structures to initialize
+    struct Student *students = malloc(numStudents * sizeof(struct Student));
 
-    printf("Enter student details (roll no, name, marks) in the format 'RollNo Name Marks':\n");
-    for (int i = 0; i < size; i++) {
-        fgets(input, sizeof(input), stdin);
-        parseString(input, &students[i], 1);
+    parseStringToStructArray(inputString, numStudents, students);
+
+    // Printing the initialized structures
+    for (int i = 0; i < numStudents; i++) {
+        printf("Roll No: %d\n", students[i].rollno);
+        printf("Name: %s\n", students[i].name);
+        printf("Marks: %.2f\n", students[i].marks);
     }
 
-    printf("\nStudents:\n");
-    displayStudents(students, size);
-
-    sortStudentsDescending(students, size);
-
-    printf("\nStudents (sorted in descending order of marks):\n");
-    displayStudents(students, size);
-
-    char searchName[20];
-    printf("\nEnter the name to search: ");
-    fgets(searchName, sizeof(searchName), stdin);
-    searchStudentByName(students, size, searchName);
+    free(students); // Free the dynamically allocated memory
 
     return 0;
 }
